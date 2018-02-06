@@ -1,0 +1,25 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Memory game</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/normalize.css">
+        <script src="js/main.js" defer></script>
+    </head>
+    <body onload="start();">
+        <div id="wrapper">
+            <canvas width="600px" height="600px" id="memory">
+                Your browser does not support canvas element.
+            </canvas>
+            <div id="puzzleSettings">
+                <textarea placeholder="Number of pairs" id="puzzles"></textarea></br>
+                <button id="setPuzzles" class = "btn" onclick="setNumberOfPuzzles();">Set number of pairs</button>
+            </div>
+        </div>
+        <div id = "points"> Points: <span id="pts"></span></div>
+    </body>
+</html>
