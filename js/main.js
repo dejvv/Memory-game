@@ -1,10 +1,50 @@
 const ptsElement = document.querySelector("#pts"); // element for points
 let numberOfPuzzlesButton = false; // if user changed number of puzzles
 let gameInProgress = false; // if game is in progress
+let colors = []; // colors that are used in for puzzles
 
-// function set random puzzles on canvas
-function randomPuzzles() {
+// function returns random color
+function setColors(n) {
+    for(let i = 0; i < n; i++) {
+        // color of two puzzles
+        let color = getColor();
+        // if this color is already 2 times in array
+        if(checkArray(colors, color)){
+            i--;
+            continue;
+        }
+        // add this color to colors
+        colors.push(color);
+        colors.push(color);
+    }
+    // lets mix shuffle colors
+    colors = shuffleArray(colors);
+}
+// function checks if element is in array 2 times and returns true if it is or false otherwise
+function checkArray(array, element) {
+    let inside = array.indexOf(element);
+    inside = array.indexOf(element, inside + 1);
+    return inside !== -1;
+}
 
+// function shuffle's array
+// reference https://bost.ocks.org/mike/shuffle/
+function shuffleArray(array) {
+    let m = array.length, t, i;
+
+    // While there remain elements to shuffle…
+    while (m) {
+
+        // Pick a remaining element…
+        i = Math.floor(Math.random() * m--);
+
+        // And swap it with the current element.
+        t = array[m];
+        array[m] = array[i];
+        array[i] = t;
+    }
+
+    return array;
 }
 
 // function checks value of html element(textarea,..)
@@ -63,6 +103,7 @@ function computeSquare(x, y, n) {
     }
 }
 
+// method returns(when button is pressed) number of puzzles that user wrote in text area
 function setNumberOfPuzzles() {
     numberOfPuzzlesButton = true;
     // check value that is in textarea
@@ -72,18 +113,13 @@ function setNumberOfPuzzles() {
     return number;
 }
 
-let colors = ["#8d2323", "#2f89ab", "#85ab2f", "#ab672f", "#ab2f9a", "#a7a7a7", "#00ff78", "#0011ff", "#ffffff", "#ffce00"];
-
 // returns random color
-function setColor() {
-    return colors[randomNumber(0, 10)];
+// reference https://www.paulirish.com/2009/random-hex-color-code-snippets/
+function getColor() {
+    return '#'+Math.floor(Math.random()*16777215).toString(16);
 }
 
-// return random numbers in interval [min, max)
-function randomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
+// function starts after body is loaded
 function start() {
     requestAnimationFrame(() => a.refresh());
     console.log("Started");
@@ -98,12 +134,6 @@ class Canvas {
         this.puzzles = []; // no puzzles on canvas yes
         this.numberOfPuzzles = 16; // by default, you are solving 16 puzzles, so 16 pairs
 
-        // create new grid and draw it
-        this.grid = new Grid(this.context, this.canvas.width, this.canvas.height);
-
-        // create 16 (this.numberOfPuzzles) puzzles
-        this.fillPuzzles();
-
         // number of currently selected puzzles;
         this.selectedPuzzles = 0;
 
@@ -116,9 +146,19 @@ class Canvas {
         // score
         this.score = 0;
 
+        // general distance for one square
+        this.distance = computeSquare(this.canvas.width, this.canvas.height, this.numberOfPuzzles).size;
+
+        // create new grid and draw it
+        this.grid = new Grid(this.context, this.canvas.width, this.canvas.height);
+
+        // create 16 (this.numberOfPuzzles) puzzles
+        this.fillPuzzles();
+
         this.canvas.addEventListener("click", (event) => this.mouseClicked(event));
     }
 
+    // method returns coordinates of mouse
     mouseCord(event) {
         // get radius/2 of a puzzle, its important otherwise it doesn't work
         // puzzle is exactly at x, y coordinates and not at x - radius/2, y - radius/2
@@ -130,6 +170,7 @@ class Canvas {
         };
     }
 
+    // mouse click
     mouseClicked(event) {
         // simulate wait for 2 seconds, do nothing with click in this interval
         // that works, because time is initialized only when 2 puzzles are selected
@@ -149,45 +190,49 @@ class Canvas {
     }
 
     fillPuzzles() {
-        let hehe = true;
-        let barve = [];
-        let color;
-        let i = 0;
+        // distances along different axis
+        let xDistance = 0;
+        let yDistance = 0;
 
-        // while(this.numberOfPuzzles > this.puzzles.length) {
-        // unique color
-        // while (hehe) {
-        //     color = setColor();
-        //     for (let i = 0; i < barve.length; i++) {
-        //         if (color === barve[i]) {
-        //             hehe = true;
-        //             break;
-        //         } else hehe = false;
-        //     }
-        // }
-        // barve.push(color);
+        // set up all the colors needed
+        setColors(this.numberOfPuzzles/2);
 
-        let distance = computeSquare(this.canvas.width, this.canvas.height, this.numberOfPuzzles).size;
+        // go to (number of puzzles)/2 because in each iteration 2 puzzles are being created
+        for(let i = 0; i < this.numberOfPuzzles/2; i++){
+            // y distance is at maximum
+            if(yDistance === this.canvas.height){
+                yDistance = 0;
+                xDistance += this.distance;
+            }
+            // color of puzzle
+            let color = colors.pop();
+            // add new puzzle, and increment position along y axis for new one
+            this.puzzles.push(new Puzzle(this.context, color, xDistance, yDistance, this.distance));
+            yDistance += this.distance;
 
-        this.puzzles.push(new Puzzle(this.context, colors[0], 0, 0, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[1], 0, 150, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[1], 0, 300, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[3], 0, 450, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[0], 150, 0, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[2], 150, 150, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[3], 150, 300, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[2], 150, 450, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[4], 300, 0, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[7], 300, 150, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[5], 300, 300, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[6], 300, 450, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[6], 450, 0, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[4], 450, 150, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[5], 450, 300, distance));
-        this.puzzles.push(new Puzzle(this.context, colors[7], 450, 450, distance));
-        // i++;
-        // }
+            color = colors.pop();
+            this.puzzles.push(new Puzzle(this.context, color, xDistance, yDistance, this.distance));
+            yDistance += this.distance;
+
+        }
     }
+
+    // checkMembershipOfPair(element) {
+        // let inside = this.puzzles.indexOf(element);
+        // // check if another element is present, but ahead of this index
+        // inside = this.puzzles.indexOf(element, inside + 1);
+        // console.log("inside",inside===-1);
+        // if(inside === -1) return false;
+        // return true;
+    //     let countElement = 0; // represents how many times element with same color is present in array
+    //     for(let i = 0; i < this.puzzles.length; i++){
+    //         if(this.puzzles[i].color === element)
+    //             countElement++;
+    //         // if two elements got same color, no more elements should be added
+    //         if(countElement === 2) return true;
+    //     }
+    //     return false;
+    // }
 
     game(){
         // two puzzles are selected, so lets determine whether they match or not
@@ -248,8 +293,10 @@ class Canvas {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
         // draw grid
         this.grid.draw(this.numberOfPuzzles);
+
         // draw puzzles
         for (let i = 0; i < this.puzzles.length; i++)
+            // lets draw it only if its selected
             if(this.puzzles[i].selected)
                 this.puzzles[i].draw();
 
@@ -320,6 +367,7 @@ class Puzzle {
         this.selected = !this.selected;
     }
 
+    // draws square
     draw() {
         this.context.beginPath();
         this.context.rect(this.x, this.y, this.radius, this.radius);

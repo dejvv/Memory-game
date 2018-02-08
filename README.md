@@ -1,2 +1,11 @@
 # Memory-game
-Memory game in javascript
+
+Memory game in plain javascript and html.
+You can try it [here](https://dejvv.github.io/Memory-game/).
+
+Version 1.0:
+- [x] Basic game rules, two puzzles of the same kind(color) represents pair
+- [x] Hide puzzles after some time
+- [x] Score counter
+- [x] Puzzles with random colors
+- [x]
