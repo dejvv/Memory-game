@@ -1,7 +1,52 @@
 const ptsElement = document.querySelector("#pts"); // element for points
-let numberOfPuzzlesButton = false; // if user changed number of puzzles
+const timeElement = document.querySelector("#tms"); // element for points
+
 let gameInProgress = false; // if game is in progress
 let colors = []; // colors that are used in for puzzles
+let numberOfPuzzles = 16; // default number of puzzles
+let possibleNumberOfPuzzles = [4, 16, 36, 64, 100, 144, 400, 576, 900, 1600]; // number of possible puzzles user can choose from
+let lastLoop = Date.now(); // to measure time correctly
+
+// what user selected from dropdown menu
+// when new game button is pressed
+$(document).ready(function(){
+    $('#setPuzzles').click(function(){
+        // get value from selected option
+        numberOfPuzzles = $("#combo").children("option").filter(":selected").val();
+        // don't draw anything, update first
+        gameInProgress = false;
+        console.log("gameInProgress:",gameInProgress);
+        if(a.newGame((numberOfPuzzles)))
+            gameInProgress = true;
+        console.log("gameInProgress:",gameInProgress);
+    });
+});
+
+
+function gameLoop() {
+    let thisLoop = Date.now();
+    lastLoop = thisLoop;
+}
+
+// populate select in html with elements from array
+function populateSelect(array){
+    let select = document.getElementById("combo");
+    let index = 0;
+    for(let element in array)
+    {
+        let opt = document.createElement("option");
+        opt.value = array[element];
+        opt.innerHTML = array[element] / 2 + " pairs"; // whatever property it has
+
+        // then append it to the select element
+        select.appendChild(opt);
+        index++;
+    }
+    select.value=16;
+}
+// lets use our first function
+// populate select in html
+populateSelect(possibleNumberOfPuzzles);
 
 // function returns random color
 function setColors(n) {
@@ -45,17 +90,6 @@ function shuffleArray(array) {
     }
 
     return array;
-}
-
-// function checks value of html element(textarea,..)
-// returns elements value if it's number, otherwise returns false
-function checkInput(element) {
-    console.log("[Checking element]", element);
-    console.log("[Checking element's value]", element.value);
-
-    if (element.value === "") return false; // empty element
-    if (isNaN(element.value)) return false; // not a number
-    return element.value; // it is a number, so return it
 }
 
 // method for computing how many squares can be fit into bigger square(grid)
@@ -105,12 +139,19 @@ function computeSquare(x, y, n) {
 
 // method returns(when button is pressed) number of puzzles that user wrote in text area
 function setNumberOfPuzzles() {
-    numberOfPuzzlesButton = true;
-    // check value that is in textarea
-    let number = checkInput(document.getElementById("puzzles"));
-    // no correct input
-    if (!number) return false;
-    return number;
+    // gameInProgress = false;
+    // console.log("gameInProgress",gameInProgress);
+    // if(a.newGame((numberOfPuzzles)))
+    //     gameInProgress = true;
+    // console.log("gameInProgress",gameInProgress);
+
+    // Promise.all([
+    //     a.newGame(numberOfPuzzles)
+    // ]).then(() => {
+    //     gameInProgress = true;
+    // });
+    // console.log("gameInProgress",gameInProgress);
+
 }
 
 // returns random color
@@ -149,14 +190,67 @@ class Canvas {
         // general distance for one square
         this.distance = computeSquare(this.canvas.width, this.canvas.height, this.numberOfPuzzles).size;
 
-        // create new grid and draw it
+        // create new grid
         this.grid = new Grid(this.context, this.canvas.width, this.canvas.height);
 
         // create 16 (this.numberOfPuzzles) puzzles
         this.fillPuzzles();
 
         this.canvas.addEventListener("click", (event) => this.mouseClicked(event));
+
+        gameInProgress = true;
     }
+
+    logVariables(){
+        console.log("[puzzles]", this.puzzles);
+        console.log("[numberOfPuzzles]", this.numberOfPuzzles);
+        console.log("[selectedPuzzles]", this.selectedPuzzles);
+        console.log("[time]", this.time);
+        console.log("[selectedIndexes]", this.selectedIndexes);
+        console.log("[score]", this.score);
+        console.log("[distance]", this.distance);
+    }
+
+    newGame(numberOfPuzzles){
+        // return new Promise((resolve, reject) => {
+        //     this.puzzles = [];
+        //     this.numberOfPuzzles = numberOfPuzzles;
+        //     this.selectedPuzzles = 0;
+        //     this.time = null;
+        //     this.selectedIndexes = [];
+        //     this.score = 0;
+        //     this.distance = computeSquare(this.canvas.width, this.canvas.height, this.numberOfPuzzles).size;
+        //     this.fillPuzzles();
+        //     console.log("**New game**");
+        //     resolve();
+        // });
+        this.puzzles = [];
+        this.numberOfPuzzles = numberOfPuzzles;
+        this.selectedPuzzles = 0;
+        this.time = null;
+        this.selectedIndexes = [];
+        this.score = 0;
+        this.distance = computeSquare(this.canvas.width, this.canvas.height, this.numberOfPuzzles).size;
+        this.fillPuzzles();
+        console.log("**New game**");
+        return true;
+    }
+
+    // function calculates possible number of puzzles(first 100)
+    // prepareNumberOfPuzzles(){
+    //     let array = [];
+    //     for(let i = 0; array.length < 10; i++) {
+    //         let distance = computeSquare(this.canvas.width, this.canvas.height, i).size;
+    //         let result = (this.canvas.width * this.canvas.height)/(distance*distance);
+    //         console.log("distance for", i, "[i] puzzles is:", distance, "[distance] and result is:", result);
+    //
+    //         // if number is whole and even
+    //         if(i === result && result % 2 === 0 && result > 1 && distance % 1 === 0)
+    //             array.push(i);
+    //     }
+    //     console.log(array);
+    //     return array;
+    // }
 
     // method returns coordinates of mouse
     mouseCord(event) {
@@ -199,40 +293,32 @@ class Canvas {
 
         // go to (number of puzzles)/2 because in each iteration 2 puzzles are being created
         for(let i = 0; i < this.numberOfPuzzles/2; i++){
-            // y distance is at maximum
-            if(yDistance === this.canvas.height){
-                yDistance = 0;
-                xDistance += this.distance;
-            }
             // color of puzzle
             let color = colors.pop();
             // add new puzzle, and increment position along y axis for new one
             this.puzzles.push(new Puzzle(this.context, color, xDistance, yDistance, this.distance));
             yDistance += this.distance;
 
+            // y distance is at maximum
+            if(yDistance >= this.canvas.height){
+                yDistance = 0;
+                xDistance += this.distance;
+            }
+
             color = colors.pop();
             this.puzzles.push(new Puzzle(this.context, color, xDistance, yDistance, this.distance));
             yDistance += this.distance;
 
-        }
-    }
+            // y distance is at maximum
+            if(yDistance >= this.canvas.height){
+                yDistance = 0;
+                xDistance += this.distance;
+            }
 
-    // checkMembershipOfPair(element) {
-        // let inside = this.puzzles.indexOf(element);
-        // // check if another element is present, but ahead of this index
-        // inside = this.puzzles.indexOf(element, inside + 1);
-        // console.log("inside",inside===-1);
-        // if(inside === -1) return false;
-        // return true;
-    //     let countElement = 0; // represents how many times element with same color is present in array
-    //     for(let i = 0; i < this.puzzles.length; i++){
-    //         if(this.puzzles[i].color === element)
-    //             countElement++;
-    //         // if two elements got same color, no more elements should be added
-    //         if(countElement === 2) return true;
-    //     }
-    //     return false;
-    // }
+        }
+        console.log("[PUZZLES] new puzzles created");
+        return true;
+    }
 
     game(){
         // two puzzles are selected, so lets determine whether they match or not
@@ -255,53 +341,57 @@ class Canvas {
     }
 
     refresh() {
-        // display score
-        ptsElement.textContent = this.score;
+        // only draw if nothing is being changed
+        if(gameInProgress) {
+            // display score
 
-        // check if there are any elements left
-        if(this.puzzles.length === 0) {
-            alert("Congratulations!");
-            window.location.reload(false);
-        }
+            ptsElement.textContent = this.score;
 
-        // if two puzzles are opened, initialize time to default value(0)
-        if(this.time === null && this.selectedPuzzles === 2) this.time = 0;
-        // how many iterations passed
-        if(this.time !== null) this.time++;
-
-        // two puzzles are selected, so lets determine whether they match or not
-        if(this.selectedPuzzles === 2){
-
-            // simulate wait for 2 seconds, 60 calls of this method are made per second
-            if(this.time >= 120) {
-                console.log("[PUZZLES] Hiding puzzles");
-                // do something with this two puzzles
-
-                // change selected puzzles to not selected, can be maximum two, so not need for loop
-                this.puzzles[this.selectedIndexes[0]].changeState();
-                this.puzzles[this.selectedIndexes[1]].changeState();
-                this.game();
-
-                // let's reset this
-                this.time = null;
-                this.selectedPuzzles = 0;
-                this.selectedIndexes = [];
+            // check if there are any elements left
+            if (this.puzzles.length === 0) {
+                alert("Congratulations!");
+                window.location.reload(false);
             }
+
+            // if two puzzles are opened, initialize time to default value(0)
+            if (this.time === null && this.selectedPuzzles === 2) this.time = 0;
+            // how many iterations passed
+            if (this.time !== null) this.time++;
+
+            // two puzzles are selected, so lets determine whether they match or not
+            if (this.selectedPuzzles === 2) {
+
+                // simulate wait for 2 seconds, 60 calls of this method are made per second
+                if (this.time >= 120) {
+                    console.log("[PUZZLES] Hiding puzzles");
+                    // do something with this two puzzles
+
+                    // change selected puzzles to not selected, can be maximum two, so not need for loop
+                    this.puzzles[this.selectedIndexes[0]].changeState();
+                    this.puzzles[this.selectedIndexes[1]].changeState();
+                    this.game();
+
+                    // let's reset this
+                    this.time = null;
+                    this.selectedPuzzles = 0;
+                    this.selectedIndexes = [];
+                }
+            }
+
+            // clear canvas and draw again
+            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            // draw grid
+            this.grid.draw(this.numberOfPuzzles);
+
+            // draw puzzles
+            for (let i = 0; i < this.puzzles.length; i++)
+                // lets draw it only if its selected
+                if (this.puzzles[i].selected)
+                    this.puzzles[i].draw();
+
+
+            requestAnimationFrame(() => this.refresh());
         }
-
-        // clear canvas and draw again
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        // draw grid
-        this.grid.draw(this.numberOfPuzzles);
-
-        // draw puzzles
-        for (let i = 0; i < this.puzzles.length; i++)
-            // lets draw it only if its selected
-            if(this.puzzles[i].selected)
-                this.puzzles[i].draw();
-
-
-        requestAnimationFrame(() => this.refresh());
     }
 
     // returns index of puzzle that is clicked by user or false instead

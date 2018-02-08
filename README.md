@@ -8,4 +8,9 @@ Version 1.0:
 - [x] Hide puzzles after some time
 - [x] Score counter
 - [x] Puzzles with random colors
-- [x]
+
+Version 1.1:
+- [ ] Correct pair of puzzles should stay open(selected)
+- [ ] Scalability - correctly divide grid for more puzzles
+- [ ] New game button
+- [ ] Drop down menu for choosing number of puzzles

@@ -144,6 +144,19 @@ textarea {
     margin: auto;
 }
 
+#selectSize{
+    font-size:100%;
+    color: black;
+    font-family: 'Roboto', sans-serif;
+    position: absolute;
+    top: 55px;
+    float:left;
+    text-align: left;
+    z-index: 100;
+    display:block;
+    margin-left: 20px;
+}
+
 .btn {
     background: #3498db;
     background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
@@ -159,6 +172,7 @@ textarea {
     font-size: 14px;
     padding: 10px 20px 10px 20px;
     text-decoration: none;
+    display: block;
 }
 
 .btn:hover {
@@ -171,7 +185,27 @@ textarea {
     text-decoration: none;
 }
 
+.select-style {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    overflow: hidden;
+    background: #fafafa url("data:image/png;base64,R0lGODlhDwAUAIABAAAAAP///yH5BAEAAAEALAAAAAAPABQAAAIXjI+py+0Po5wH2HsXzmw//lHiSJZmUAAAOw==") no-repeat 90% 50%;
+    display: block;
+}
 
+.select-style select {
+    padding: 5px 8px;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    background-image: none;
+    -webkit-appearance: none;
+    width: 130%;
+}
+
+.select-style select:focus {
+    outline: none;
+}
 
 
 

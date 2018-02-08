@@ -9,6 +9,7 @@
         <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="css/normalize.css">
         <script src="js/main.js" defer></script>
+        <script src="js/vendor/jquery-3.2.1.min.js"></script>
     </head>
     <body onload="start();">
         <div id="wrapper">
@@ -16,10 +17,16 @@
                 Your browser does not support canvas element.
             </canvas>
             <div id="puzzleSettings">
-                <textarea placeholder="Number of pairs" id="puzzles"></textarea></br>
-                <button id="setPuzzles" class = "btn" onclick="setNumberOfPuzzles();">Set number of pairs</button>
+                <!--<textarea placeholder="Number of pairs" id="puzzles"></textarea></br>-->
+                <button id="setPuzzles" class = "btn">New Game</button>
             </div>
         </div>
         <div id = "points"> Points: <span id="pts"></span></div>
+        <div id = "time"> Time(s): <span id="tms"></span></div>
+
+        <div class="select-style" id = "selectSize">
+            <select id="combo">
+            </select>
+        </div>
     </body>
 </html>
